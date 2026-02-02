@@ -9,7 +9,7 @@ __pycache__/
 venv/
 env/
 .venv/
-.env
+.env*
 
 # Editor/IDE-specific files and directories
 .vscode/        # VS Code
@@ -33,3 +33,4 @@ htmlcov/
 .DS_Store       # macOS
 Thumbs.db       # Windows
 
+node_modules/
