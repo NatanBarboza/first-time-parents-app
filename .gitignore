@@ -1,0 +1,35 @@
+# Byte-code files
+*.pyc
+__pycache__/
+# Compiled files
+*.pyd
+*.so
+
+# Environments
+venv/
+env/
+.venv/
+.env
+
+# Editor/IDE-specific files and directories
+.vscode/        # VS Code
+.idea/          # PyCharm
+*.swp           # Vim
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Test and coverage
+.coverage
+htmlcov/
+
+# Logs and databases
+*.log
+*.sqlite3       # Django projects
+
+# OS generated files
+.DS_Store       # macOS
+Thumbs.db       # Windows
+
