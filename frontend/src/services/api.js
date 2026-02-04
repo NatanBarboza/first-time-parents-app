@@ -156,4 +156,47 @@ export const listaComprasService = {
   },
 };
 
+// Serviços de Histórico de Compras
+export const compraService = {
+  getAll: async (dataInicial = null, dataFinal = null) => {
+    const params = {};
+    if (dataInicial) params.data_inicial = dataInicial;
+    if (dataFinal) params.data_final = dataFinal;
+    
+    const response = await api.get('/compras/', { params });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(`/compras/${id}`);
+    return response.data;
+  },
+
+  getEstatisticas: async (dias = 30) => {
+    const response = await api.get('/compras/estatisticas', {
+      params: { dias }
+    });
+    return response.data;
+  },
+
+  create: async (compra) => {
+    const response = await api.post('/compras/', compra);
+    return response.data;
+  },
+
+  finalizarLista: async (listaId, dados) => {
+    const response = await api.post(`/compras/finalizar-lista/${listaId}`, dados);
+    return response.data;
+  },
+
+  update: async (id, compra) => {
+    const response = await api.put(`/compras/${id}`, compra);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    await api.delete(`/compras/${id}`);
+  },
+};
+
 export default api;

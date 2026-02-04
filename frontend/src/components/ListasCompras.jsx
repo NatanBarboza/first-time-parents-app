@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { listaComprasService } from '../services/api';
+import { listaComprasService, compraService } from '../services/api';
 
 function ListasCompras() {
   const [listas, setListas] = useState([]);
@@ -7,12 +7,19 @@ function ListasCompras() {
   const [loading, setLoading] = useState(true);
   const [showNovaLista, setShowNovaLista] = useState(false);
   const [showNovoItem, setShowNovoItem] = useState(false);
+  const [showFinalizarLista, setShowFinalizarLista] = useState(false);
   const [novaLista, setNovaLista] = useState({ nome: '', descricao: '' });
   const [novoItem, setNovoItem] = useState({
     nome_item: '',
     quantidade: 1,
     preco_estimado: '',
     observacao: ''
+  });
+  const [finalizacaoData, setFinalizacaoData] = useState({
+    local_compra: '',
+    observacao: '',
+    adicionar_ao_estoque: true,
+    atualizar_precos: true
   });
 
   useEffect(() => {
@@ -126,6 +133,37 @@ function ListasCompras() {
     }
   };
 
+  const handleAbrirFinalizacao = () => {
+    setShowFinalizarLista(true);
+  };
+
+  const handleFinalizarLista = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await compraService.finalizarLista(listaAtual.id, finalizacaoData);
+      
+      setShowFinalizarLista(false);
+      setFinalizacaoData({
+        local_compra: '',
+        observacao: '',
+        adicionar_ao_estoque: true,
+        atualizar_precos: true
+      });
+      
+      loadListas();
+      setListaAtual(null);
+      
+      const mensagem = finalizacaoData.adicionar_ao_estoque
+        ? 'Lista finalizada e produtos adicionados ao estoque!'
+        : 'Lista finalizada com sucesso!';
+      
+      alert(mensagem + `\nTotal: R$ ${response.valor_total.toFixed(2)}`);
+    } catch (error) {
+      console.error('Erro ao finalizar lista:', error);
+      alert('Erro ao finalizar lista: ' + (error.response?.data?.detail || error.message));
+    }
+  };
+
   const calcularTotal = () => {
     if (!listaAtual?.itens) return 0;
     return listaAtual.itens.reduce((total, item) => {
@@ -204,9 +242,9 @@ function ListasCompras() {
                     </button>
                     <button 
                       className="btn btn-primary"
-                      onClick={() => handleConcluirLista(listaAtual.id)}
+                      onClick={handleAbrirFinalizacao}
                     >
-                      Concluir Lista
+                      Finalizar e Registrar Compra
                     </button>
                   </>
                 )}
@@ -355,6 +393,72 @@ function ListasCompras() {
               <div className="form-actions">
                 <button type="submit" className="btn btn-success">Adicionar</button>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowNovoItem(false)}>
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Finalizar Lista */}
+      {showFinalizarLista && (
+        <div className="modal-overlay" onClick={() => setShowFinalizarLista(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Finalizar Lista e Registrar Compra</h2>
+            <p className="modal-subtitle">
+              Esta ação irá criar um registro de compra e, opcionalmente, adicionar os produtos ao estoque.
+            </p>
+            <form onSubmit={handleFinalizarLista}>
+              <div className="form-group">
+                <label>Local da Compra</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Supermercado XYZ"
+                  value={finalizacaoData.local_compra}
+                  onChange={(e) => setFinalizacaoData({...finalizacaoData, local_compra: e.target.value})}
+                />
+              </div>
+              <div className="form-group">
+                <label>Observação</label>
+                <textarea
+                  placeholder="Notas sobre esta compra..."
+                  value={finalizacaoData.observacao}
+                  onChange={(e) => setFinalizacaoData({...finalizacaoData, observacao: e.target.value})}
+                />
+              </div>
+              <div className="form-group checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={finalizacaoData.adicionar_ao_estoque}
+                    onChange={(e) => setFinalizacaoData({...finalizacaoData, adicionar_ao_estoque: e.target.checked})}
+                  />
+                  <span>Adicionar produtos ao estoque</span>
+                </label>
+                <p className="help-text">
+                  Os itens comprados serão adicionados automaticamente ao seu estoque de produtos
+                </p>
+              </div>
+              <div className="form-group checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={finalizacaoData.atualizar_precos}
+                    onChange={(e) => setFinalizacaoData({...finalizacaoData, atualizar_precos: e.target.checked})}
+                    disabled={!finalizacaoData.adicionar_ao_estoque}
+                  />
+                  <span>Atualizar preços dos produtos</span>
+                </label>
+                <p className="help-text">
+                  Os preços dos produtos existentes serão atualizados com os valores desta compra
+                </p>
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary">
+                  Finalizar e Registrar
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowFinalizarLista(false)}>
                   Cancelar
                 </button>
               </div>

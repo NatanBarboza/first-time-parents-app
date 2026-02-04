@@ -5,6 +5,7 @@ import ProdutoForm from './components/ProdutoForm';
 import Login from './components/Login';
 import Register from './components/Register';
 import ListasCompras from './components/ListasCompras';
+import HistoricoCompras from './components/HistoricoCompras';
 import { produtoService, authService } from './services/api';
 
 function App() {
@@ -16,7 +17,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
-  const [currentView, setCurrentView] = useState('produtos'); // 'produtos' ou 'listas'
+  const [currentView, setCurrentView] = useState('produtos'); // 'produtos', 'listas' ou 'historico'
 
   useEffect(() => {
     checkAuth();
@@ -168,6 +169,12 @@ function App() {
             >
               🛒 Listas de Compras
             </button>
+            <button
+              className={`nav-tab ${currentView === 'historico' ? 'active' : ''}`}
+              onClick={() => setCurrentView('historico')}
+            >
+              📊 Histórico
+            </button>
           </nav>
           <button className="btn btn-secondary" onClick={handleLogout}>
             Sair
@@ -175,7 +182,9 @@ function App() {
         </div>
       </header>
 
-      {currentView === 'listas' ? (
+      {currentView === 'historico' ? (
+        <HistoricoCompras />
+      ) : currentView === 'listas' ? (
         <ListasCompras />
       ) : (
         <>
