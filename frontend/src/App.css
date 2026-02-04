@@ -308,8 +308,302 @@ h1 {
   margin-bottom: 5px;
 }
 
+.header-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-tab {
+  padding: 10px 20px;
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s;
+}
+
+.nav-tab:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.nav-tab.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
 .user-info {
   color: #666;
   font-size: 14px;
   margin: 0;
+}
+
+/* Listas de Compras */
+.listas-compras-container {
+  display: flex;
+  gap: 20px;
+  height: calc(100vh - 200px);
+}
+
+.listas-sidebar {
+  width: 300px;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.listas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lista-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.lista-item:hover {
+  background: #e9ecef;
+  transform: translateX(2px);
+}
+
+.lista-item.active {
+  background: #e7f3ff;
+  border-color: #007bff;
+}
+
+.lista-item.concluida {
+  opacity: 0.7;
+}
+
+.lista-item.concluida h3 {
+  text-decoration: line-through;
+}
+
+.lista-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.lista-item h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.badge-concluida {
+  background: #28a745;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.lista-descricao {
+  font-size: 13px;
+  color: #666;
+  margin: 5px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lista-stats {
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
+}
+
+.lista-detalhes {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.detalhes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #eee;
+}
+
+.detalhes-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+}
+
+.lista-descricao-full {
+  color: #666;
+  margin: 0;
+}
+
+.detalhes-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.lista-progresso {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.progresso-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.progresso-valor {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.progresso-bar {
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progresso-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  transition: width 0.3s ease;
+}
+
+.itens-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.item-card:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.item-card.comprado {
+  opacity: 0.6;
+}
+
+.item-card.comprado h3 {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.item-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.item-detalhes {
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.item-observacao {
+  font-size: 13px;
+  color: #888;
+  margin: 5px 0 0 0;
+  font-style: italic;
+}
+
+.btn-remove-item {
+  background: #dc3545;
+  color: white;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.btn-remove-item:hover {
+  background: #c82333;
+}
+
+.empty-message {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-size: 14px;
 }

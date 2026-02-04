@@ -101,4 +101,59 @@ export const produtoService = {
   },
 };
 
+// Serviços de Listas de Compras
+export const listaComprasService = {
+  // Listas
+  getAll: async (apenasAtivas = false) => {
+    const response = await api.get('/listas-compras/', {
+      params: { apenas_ativas: apenasAtivas }
+    });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(`/listas-compras/${id}`);
+    return response.data;
+  },
+
+  getResumo: async (id) => {
+    const response = await api.get(`/listas-compras/${id}/resumo`);
+    return response.data;
+  },
+
+  create: async (lista) => {
+    const response = await api.post('/listas-compras/', lista);
+    return response.data;
+  },
+
+  update: async (id, lista) => {
+    const response = await api.put(`/listas-compras/${id}`, lista);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    await api.delete(`/listas-compras/${id}`);
+  },
+
+  // Itens
+  addItem: async (listaId, item) => {
+    const response = await api.post(`/listas-compras/${listaId}/itens`, item);
+    return response.data;
+  },
+
+  updateItem: async (itemId, item) => {
+    const response = await api.put(`/listas-compras/itens/${itemId}`, item);
+    return response.data;
+  },
+
+  deleteItem: async (itemId) => {
+    await api.delete(`/listas-compras/itens/${itemId}`);
+  },
+
+  toggleItemComprado: async (itemId) => {
+    const response = await api.patch(`/listas-compras/itens/${itemId}/toggle-comprado`);
+    return response.data;
+  },
+};
+
 export default api;

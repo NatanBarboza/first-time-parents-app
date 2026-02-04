@@ -4,6 +4,7 @@ import ProdutoCard from './components/ProdutoCard';
 import ProdutoForm from './components/ProdutoForm';
 import Login from './components/Login';
 import Register from './components/Register';
+import ListasCompras from './components/ListasCompras';
 import { produtoService, authService } from './services/api';
 
 function App() {
@@ -15,16 +16,17 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
+  const [currentView, setCurrentView] = useState('produtos'); // 'produtos' ou 'listas'
 
   useEffect(() => {
     checkAuth();
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && currentView === 'produtos') {
       loadProdutos();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, currentView]);
 
   const checkAuth = async () => {
     const token = authService.getToken();
@@ -152,58 +154,80 @@ function App() {
             </p>
           )}
         </div>
-        <button className="btn btn-secondary" onClick={handleLogout}>
-          Sair
-        </button>
+        <div className="header-actions">
+          <nav className="nav-tabs">
+            <button
+              className={`nav-tab ${currentView === 'produtos' ? 'active' : ''}`}
+              onClick={() => setCurrentView('produtos')}
+            >
+              📦 Produtos
+            </button>
+            <button
+              className={`nav-tab ${currentView === 'listas' ? 'active' : ''}`}
+              onClick={() => setCurrentView('listas')}
+            >
+              🛒 Listas de Compras
+            </button>
+          </nav>
+          <button className="btn btn-secondary" onClick={handleLogout}>
+            Sair
+          </button>
+        </div>
       </header>
 
-      <form onSubmit={handleSearch} className="search-bar">
-        <input
-          type="text"
-          placeholder="Buscar produtos..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button type="submit" className="btn btn-primary">Buscar</button>
-        <button type="button" className="btn btn-success" onClick={handleCreate}>
-          Novo Produto
-        </button>
-      </form>
-
-      {loading ? (
-        <div className="loading">Carregando produtos...</div>
-      ) : produtos.length === 0 ? (
-        <div className="empty-state">
-          <h2>Nenhum produto encontrado</h2>
-          <p>Comece criando seu primeiro produto!</p>
-        </div>
+      {currentView === 'listas' ? (
+        <ListasCompras />
       ) : (
-        <div className="produtos-grid">
-          {produtos.map(produto => (
-            <ProdutoCard
-              key={produto.id}
-              produto={produto}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+        <>
+          <form onSubmit={handleSearch} className="search-bar">
+            <input
+              type="text"
+              placeholder="Buscar produtos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-          ))}
-        </div>
-      )}
+            <button type="submit" className="btn btn-primary">Buscar</button>
+            <button type="button" className="btn btn-success" onClick={handleCreate}>
+              Novo Produto
+            </button>
+          </form>
 
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>{editingProduto ? 'Editar Produto' : 'Novo Produto'}</h2>
-            <ProdutoForm
-              produto={editingProduto}
-              onSave={handleSave}
-              onCancel={() => {
-                setShowModal(false);
-                setEditingProduto(null);
-              }}
-            />
-          </div>
-        </div>
+          {loading ? (
+            <div className="loading">Carregando produtos...</div>
+          ) : produtos.length === 0 ? (
+            <div className="empty-state">
+              <h2>Nenhum produto encontrado</h2>
+              <p>Comece criando seu primeiro produto!</p>
+            </div>
+          ) : (
+            <div className="produtos-grid">
+              {produtos.map(produto => (
+                <ProdutoCard
+                  key={produto.id}
+                  produto={produto}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
+
+          {showModal && (
+            <div className="modal-overlay" onClick={() => setShowModal(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <h2>{editingProduto ? 'Editar Produto' : 'Novo Produto'}</h2>
+                <ProdutoForm
+                  produto={editingProduto}
+                  onSave={handleSave}
+                  onCancel={() => {
+                    setShowModal(false);
+                    setEditingProduto(null);
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
