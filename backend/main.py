@@ -8,6 +8,7 @@ import schemas
 import crud
 from database import engine, get_db
 from auth_routes import router as auth_router
+from lista_compras_routes import router as lista_compras_router
 from auth import get_current_active_user
 from models import User
 
@@ -16,8 +17,8 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="API de Gestão de Produtos",
-    description="API para gerenciar produtos com autenticação JWT",
-    version="2.0.0"
+    description="API para gerenciar produtos e listas de compras com autenticação JWT",
+    version="2.1.0"
 )
 
 # Configurar CORS
@@ -29,12 +30,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir rotas de autenticação
+# Incluir rotas
 app.include_router(auth_router)
+app.include_router(lista_compras_router)
 
 @app.get("/")
 def read_root():
-    return {"message": "API de Gestão de Produtos com Autenticação JWT"}
+    return {
+        "message": "API de Gestão de Produtos com Autenticação JWT",
+        "version": "2.1.0",
+        "features": ["Produtos", "Autenticação", "Listas de Compras"]
+    }
 
 @app.get("/produtos/", response_model=List[schemas.ProdutoResponse])
 def listar_produtos(

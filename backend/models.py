@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, ForeignKey
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from database import Base
 
 class Produto(Base):
@@ -27,3 +28,39 @@ class User(Base):
     is_superuser = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relacionamento com listas de compras
+    listas_compras = relationship("ListaCompras", back_populates="user", cascade="all, delete-orphan")
+
+class ListaCompras(Base):
+    __tablename__ = "listas_compras"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String(255), nullable=False)
+    descricao = Column(Text)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    concluida = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relacionamentos
+    user = relationship("User", back_populates="listas_compras")
+    itens = relationship("ItemListaCompras", back_populates="lista", cascade="all, delete-orphan")
+
+class ItemListaCompras(Base):
+    __tablename__ = "itens_lista_compras"
+
+    id = Column(Integer, primary_key=True, index=True)
+    lista_id = Column(Integer, ForeignKey("listas_compras.id"), nullable=False)
+    produto_id = Column(Integer, ForeignKey("produtos.id"), nullable=True)
+    nome_item = Column(String(255), nullable=False)
+    quantidade = Column(Integer, default=1)
+    comprado = Column(Boolean, default=False)
+    preco_estimado = Column(Float, nullable=True)
+    observacao = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relacionamentos
+    lista = relationship("ListaCompras", back_populates="itens")
+    produto = relationship("Produto")
+
