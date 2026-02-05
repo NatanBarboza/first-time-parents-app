@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
-from models import ListaCompras, ItemListaCompras
-from lista_compras_schemas import (
+from app.models import ListaCompras, ItemListaCompras
+from app.schemas.lista_compras import (
     ListaComprasCreate,
     ListaComprasUpdate,
     ItemListaComprasCreate,

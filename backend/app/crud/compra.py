@@ -2,9 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import List, Optional
 from datetime import datetime, timedelta
-from models import Compra, ItemCompra, Produto, ListaCompras, ItemListaCompras
-from compra_schemas import CompraCreate, CompraUpdate
-import crud as produto_crud
+from app.models import Compra, ItemCompra, Produto, ListaCompras, ItemListaCompras
+from app.schemas.compra import CompraCreate, CompraUpdate
 
 # CRUD - Compras
 def get_compra(db: Session, compra_id: int, user_id: int) -> Optional[Compra]:
