@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from typing import Optional
-from models import User
-from auth_schemas import UserCreate, UserUpdate
-from auth import get_password_hash
+from app.models import User
+from app.schemas.auth import UserCreate, UserUpdate
+from app.auth.auth import get_password_hash
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """Busca usuário por email"""
