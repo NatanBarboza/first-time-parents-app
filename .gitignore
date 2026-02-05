@@ -34,3 +34,4 @@ htmlcov/
 Thumbs.db       # Windows
 
 node_modules/
+__init__.py
