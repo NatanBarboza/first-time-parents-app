@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
 
-from app.database import get_db
-from app.models import User
-from app.schemas.auth import TokenData
+from database import get_db
+from models import User
+from auth_schemas import TokenData
 
 load_dotenv()
 
@@ -20,11 +20,7 @@ ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 # Contexto de criptografia
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    bcrypt__rounds=12
-)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")

@@ -1,18 +1,12 @@
 """
 Script para criar o primeiro usuário administrador
-Execute: python scripts/create_admin.py
+Execute: python create_admin.py
 """
 from sqlalchemy.orm import Session
-from app.database import SessionLocal, engine
-from app.models import Base, User
-from app.auth.auth import get_password_hash
+from database import SessionLocal, engine
+from models import Base, User
+from auth import get_password_hash
 import traceback
-import sys
-import os
-
-# Adicionar o diretório pai ao path para imports funcionarem
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 
 def create_admin():
     # Criar tabelas se não existirem

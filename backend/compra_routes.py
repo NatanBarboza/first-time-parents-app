@@ -3,17 +3,17 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 
-from app.database import get_db
-from app.auth.auth import get_current_active_user
-from app.models import User
-from app.schemas.compra import (
+from database import get_db
+from auth import get_current_active_user
+from models import User
+from compra_schemas import (
     CompraCreate,
     CompraUpdate,
     CompraResponse,
     CompraSummary,
     FinalizarListaRequest
 )
-from app.crud import compra as crud
+import compra_crud as crud
 
 router = APIRouter(prefix="/compras", tags=["Histórico de Compras"])
 

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app.models import Produto
-from app.schemas.produto import ProdutoCreate, ProdutoUpdate
+from models import Produto
+from schemas import ProdutoCreate, ProdutoUpdate
 from typing import List, Optional
 
 def get_produto(db: Session, produto_id: int) -> Optional[Produto]:

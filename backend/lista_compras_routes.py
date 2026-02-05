@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.database import get_db
-from app.auth.auth import get_current_active_user
-from app.models import User
-from app.schemas.lista_compras import (
+from database import get_db
+from auth import get_current_active_user
+from models import User
+from lista_compras_schemas import (
     ListaComprasCreate,
     ListaComprasUpdate,
     ListaComprasResponse,
@@ -13,7 +13,7 @@ from app.schemas.lista_compras import (
     ItemListaComprasUpdate,
     ItemListaComprasResponse
 )
-from app.crud import lista_compras as crud
+import lista_compras_crud as crud
 
 router = APIRouter(prefix="/listas-compras", tags=["Listas de Compras"])
 

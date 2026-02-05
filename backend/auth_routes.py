@@ -2,16 +2,16 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.schemas.auth import UserCreate, UserResponse, LoginRequest, Token
-from app.auth.auth import (
+from database import get_db
+from auth_schemas import UserCreate, UserResponse, LoginRequest, Token
+from auth import (
     authenticate_user,
     create_access_token,
     get_current_active_user,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
-from app.models import User
-from app.crud import user as user_crud
+from models import User
+import user_crud
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
