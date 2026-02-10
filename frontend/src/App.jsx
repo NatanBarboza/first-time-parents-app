@@ -6,7 +6,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 import ListasCompras from './components/ListasCompras';
 import HistoricoCompras from './components/HistoricoCompras';
-import { produtoService, authService } from './services/api';
+import Categorias from './components/Categorias';
+import { produtoService, authService, categoriaService } from './services/api';
 
 function App() {
   const [produtos, setProdutos] = useState([]);
@@ -17,7 +18,8 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
-  const [currentView, setCurrentView] = useState('produtos'); // 'produtos', 'listas' ou 'historico'
+  const [currentView, setCurrentView] = useState('produtos'); // 'produtos', 'listas', 'historico' ou 'categorias'
+  const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
     checkAuth();
@@ -26,8 +28,19 @@ function App() {
   useEffect(() => {
     if (isAuthenticated && currentView === 'produtos') {
       loadProdutos();
+      loadCategorias();
     }
   }, [isAuthenticated, currentView]);
+
+  const loadCategorias = async () => {
+    try {
+      const data = await categoriaService.getAll();
+      setCategorias(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+      setCategorias([]);
+    }
+  };
 
   const checkAuth = async () => {
     const token = authService.getToken();
@@ -175,6 +188,12 @@ function App() {
             >
               📊 Histórico
             </button>
+            <button
+              className={`nav-tab ${currentView === 'categorias' ? 'active' : ''}`}
+              onClick={() => setCurrentView('categorias')}
+            >
+              🏷️ Categorias
+            </button>
           </nav>
           <button className="btn btn-secondary" onClick={handleLogout}>
             Sair
@@ -186,6 +205,8 @@ function App() {
         <HistoricoCompras />
       ) : currentView === 'listas' ? (
         <ListasCompras />
+      ) : currentView === 'categorias' ? (
+        <Categorias />
       ) : (
         <>
           <form onSubmit={handleSearch} className="search-bar">
@@ -214,6 +235,7 @@ function App() {
                 <ProdutoCard
                   key={produto.id}
                   produto={produto}
+                  categorias={categorias}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
@@ -227,6 +249,7 @@ function App() {
                 <h2>{editingProduto ? 'Editar Produto' : 'Novo Produto'}</h2>
                 <ProdutoForm
                   produto={editingProduto}
+                  categorias={categorias}
                   onSave={handleSave}
                   onCancel={() => {
                     setShowModal(false);

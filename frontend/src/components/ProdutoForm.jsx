@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-function ProdutoForm({ produto, onSave, onCancel }) {
+function ProdutoForm({ produto, categorias = [], onSave, onCancel }) {
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
     preco: '',
     quantidade_estoque: '',
-    categoria: '',
+    estoque_minimo: '',
+    categoria_id: '',
     codigo_barras: '',
   });
 
@@ -16,8 +17,9 @@ function ProdutoForm({ produto, onSave, onCancel }) {
         nome: produto.nome || '',
         descricao: produto.descricao || '',
         preco: produto.preco || '',
-        quantidade_estoque: produto.quantidade_estoque || '',
-        categoria: produto.categoria || '',
+        quantidade_estoque: produto.quantidade_estoque ?? '',
+        estoque_minimo: produto.estoque_minimo ?? '',
+        categoria_id: produto.categoria_id ?? '',
         codigo_barras: produto.codigo_barras || '',
       });
     }
@@ -33,13 +35,18 @@ function ProdutoForm({ produto, onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+    const catId = formData.categoria_id && String(formData.categoria_id).trim();
     const dataToSend = {
-      ...formData,
+      nome: String(formData.nome).trim(),
+      descricao: formData.descricao ? String(formData.descricao).trim() : null,
       preco: parseFloat(formData.preco),
-      quantidade_estoque: parseInt(formData.quantidade_estoque) || 0,
+      quantidade_estoque: parseInt(formData.quantidade_estoque, 10) || 0,
+      estoque_minimo: formData.estoque_minimo !== '' && formData.estoque_minimo !== undefined
+        ? parseInt(String(formData.estoque_minimo), 10)
+        : null,
+      codigo_barras: formData.codigo_barras ? String(formData.codigo_barras).trim() : null,
+      categoria_id: catId ? parseInt(catId, 10) : null,
     };
-
     onSave(dataToSend);
   };
 
@@ -94,14 +101,32 @@ function ProdutoForm({ produto, onSave, onCancel }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="categoria">Categoria</label>
+        <label htmlFor="estoque_minimo">Estoque mínimo (alerta)</label>
         <input
-          type="text"
-          id="categoria"
-          name="categoria"
-          value={formData.categoria}
+          type="number"
+          id="estoque_minimo"
+          name="estoque_minimo"
+          min="0"
+          placeholder="Vazio = usa padrão (5)"
+          value={formData.estoque_minimo}
           onChange={handleChange}
         />
+        <small className="help-text">Quando o estoque ficar ≤ este valor, o produto aparece como &quot;estoque baixo&quot; na lista de compras.</small>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="categoria_id">Categoria</label>
+        <select
+          id="categoria_id"
+          name="categoria_id"
+          value={formData.categoria_id}
+          onChange={handleChange}
+        >
+          <option value="">Nenhuma</option>
+          {categorias.map(cat => (
+            <option key={cat.id} value={cat.id}>{cat.nome}</option>
+          ))}
+        </select>
       </div>
 
       <div className="form-group">

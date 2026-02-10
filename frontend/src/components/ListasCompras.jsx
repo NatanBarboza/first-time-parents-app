@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { listaComprasService, compraService } from '../services/api';
+import { listaComprasService, compraService, produtoService } from '../services/api';
 
 function ListasCompras() {
   const [listas, setListas] = useState([]);
@@ -8,6 +8,12 @@ function ListasCompras() {
   const [showNovaLista, setShowNovaLista] = useState(false);
   const [showNovoItem, setShowNovoItem] = useState(false);
   const [showFinalizarLista, setShowFinalizarLista] = useState(false);
+  const [showSelecionarProduto, setShowSelecionarProduto] = useState(false);
+  const [produtos, setProdutos] = useState([]);
+  const [searchProduto, setSearchProduto] = useState('');
+  const [loadingProdutos, setLoadingProdutos] = useState(false);
+  const [quantidadePorProduto, setQuantidadePorProduto] = useState({});
+  const [produtosEstoqueBaixo, setProdutosEstoqueBaixo] = useState([]);
   const [novaLista, setNovaLista] = useState({ nome: '', descricao: '' });
   const [novoItem, setNovoItem] = useState({
     nome_item: '',
@@ -119,20 +125,6 @@ function ListasCompras() {
     }
   };
 
-  const handleConcluirLista = async (id) => {
-    try {
-      await listaComprasService.update(id, { concluida: true });
-      loadListas();
-      if (listaAtual?.id === id) {
-        loadListaDetalhada(id);
-      }
-      alert('Lista marcada como concluída!');
-    } catch (error) {
-      console.error('Erro ao concluir lista:', error);
-      alert('Erro ao concluir lista');
-    }
-  };
-
   const handleAbrirFinalizacao = () => {
     setShowFinalizarLista(true);
   };
@@ -164,6 +156,69 @@ function ListasCompras() {
     }
   };
 
+  const loadProdutosEstoqueBaixo = async (limite = 5) => {
+    try {
+      const data = await produtoService.getEstoqueBaixo(limite);
+      setProdutosEstoqueBaixo(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Erro ao carregar produtos com estoque baixo:', error);
+      setProdutosEstoqueBaixo([]);
+    }
+  };
+
+  const handleAbrirNovaLista = () => {
+    setShowNovaLista(true);
+    loadProdutosEstoqueBaixo();
+  };
+
+  const handleAbrirSelecionarProduto = async () => {
+    setShowSelecionarProduto(true);
+    setQuantidadePorProduto({});
+    loadProdutosEstoqueBaixo();
+    loadProdutos();
+  };
+
+  const loadProdutos = async (search = '') => {
+    try {
+      setLoadingProdutos(true);
+      const data = await listaComprasService.getProdutosSugeridos(listaAtual.id, search);
+      setProdutos(data);
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
+    } finally {
+      setLoadingProdutos(false);
+    }
+  };
+
+  const handleSearchProduto = (e) => {
+    const value = e.target.value;
+    setSearchProduto(value);
+    loadProdutos(value);
+  };
+
+  const handleAdicionarProdutoExistente = async (produtoId) => {
+    const qty = Math.max(1, parseInt(quantidadePorProduto[produtoId], 10) || 1);
+    try {
+      await listaComprasService.addProdutoExistente(listaAtual.id, produtoId, qty);
+      loadListaDetalhada(listaAtual.id);
+      setShowSelecionarProduto(false);
+      setSearchProduto('');
+      setQuantidadePorProduto({});
+      alert(`Produto adicionado à lista (quantidade: ${qty})!`);
+    } catch (error) {
+      console.error('Erro ao adicionar produto:', error);
+      alert('Erro ao adicionar produto');
+    }
+  };
+
+  const setQuantidadeProduto = (produtoId, valor) => {
+    const num = parseInt(valor, 10);
+    setQuantidadePorProduto(prev => ({
+      ...prev,
+      [produtoId]: isNaN(num) || num < 1 ? 1 : num
+    }));
+  };
+
   const calcularTotal = () => {
     if (!listaAtual?.itens) return 0;
     return listaAtual.itens.reduce((total, item) => {
@@ -188,7 +243,7 @@ function ListasCompras() {
           <h2>Minhas Listas</h2>
           <button 
             className="btn btn-success btn-sm"
-            onClick={() => setShowNovaLista(true)}
+            onClick={handleAbrirNovaLista}
           >
             + Nova Lista
           </button>
@@ -236,9 +291,15 @@ function ListasCompras() {
                   <>
                     <button 
                       className="btn btn-success"
+                      onClick={handleAbrirSelecionarProduto}
+                    >
+                      🛍️ Adicionar do Estoque
+                    </button>
+                    <button 
+                      className="btn btn-info"
                       onClick={() => setShowNovoItem(true)}
                     >
-                      + Adicionar Item
+                      ✏️ Novo Item
                     </button>
                     <button 
                       className="btn btn-primary"
@@ -274,6 +335,7 @@ function ListasCompras() {
               {listaAtual.itens.length === 0 ? (
                 <div className="empty-state">
                   <p>Nenhum item na lista ainda</p>
+                  <p>Adicione produtos do seu estoque ou crie itens personalizados</p>
                 </div>
               ) : (
                 listaAtual.itens.map(item => (
@@ -287,7 +349,10 @@ function ListasCompras() {
                       />
                     </div>
                     <div className="item-info">
-                      <h3>{item.nome_item}</h3>
+                      <h3>
+                        {item.nome_item}
+                        {item.produto_id && <span className="badge-produto">📦 Do estoque</span>}
+                      </h3>
                       <div className="item-detalhes">
                         <span>Quantidade: {item.quantidade}</span>
                         {item.preco_estimado && (
@@ -319,6 +384,12 @@ function ListasCompras() {
         <div className="modal-overlay" onClick={() => setShowNovaLista(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h2>Nova Lista de Compras</h2>
+            {produtosEstoqueBaixo.length > 0 && (
+              <div className="alerta-estoque-baixo">
+                <strong>⚠️ Produtos com estoque baixo:</strong>
+                <p>Considere incluir na lista: {produtosEstoqueBaixo.map(p => p.nome).join(', ')}</p>
+              </div>
+            )}
             <form onSubmit={handleCriarLista}>
               <div className="form-group">
                 <label>Nome da Lista *</label>
@@ -348,11 +419,102 @@ function ListasCompras() {
         </div>
       )}
 
+      {/* Modal Selecionar Produto */}
+      {showSelecionarProduto && (
+        <div className="modal-overlay" onClick={() => setShowSelecionarProduto(false)}>
+          <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
+            <h2>Adicionar Produto do Estoque</h2>
+            <p className="modal-subtitle">Selecione um produto já cadastrado no seu estoque</p>
+            {produtosEstoqueBaixo.length > 0 && (
+              <div className="alerta-estoque-baixo">
+                <strong>⚠️ Produtos com estoque baixo:</strong>{' '}
+                {produtosEstoqueBaixo.map(p => p.nome).join(', ')}
+              </div>
+            )}
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="🔍 Buscar produto..."
+                value={searchProduto}
+                onChange={handleSearchProduto}
+                className="search-input"
+              />
+            </div>
+
+            <div className="produtos-grid">
+              {loadingProdutos ? (
+                <div className="loading">Carregando produtos...</div>
+              ) : produtos.length === 0 ? (
+                <div className="empty-state">
+                  <p>Nenhum produto encontrado</p>
+                  <button className="btn btn-info" onClick={() => setShowNovoItem(true)}>
+                    Criar Novo Item
+                  </button>
+                </div>
+              ) : (
+                produtos.map(produto => (
+                  <div key={produto.id} className="produto-card produto-card-lista">
+                    <div className="produto-info">
+                      <h3>{produto.nome}</h3>
+                      {(produto.categoria_nome || produto.categoria) && (
+                        <span className="categoria-badge">{produto.categoria_nome || produto.categoria}</span>
+                      )}
+                      <div className="produto-detalhes">
+                        <span className="preco">R$ {produto.preco.toFixed(2)}</span>
+                        <span className="estoque">Estoque: {produto.quantidade_estoque}</span>
+                      </div>
+                    </div>
+                    <div className="produto-add-row">
+                      <label className="quantidade-label">
+                        Qtd:
+                        <input
+                          type="number"
+                          min="1"
+                          value={quantidadePorProduto[produto.id] ?? 1}
+                          onChange={(e) => setQuantidadeProduto(produto.id, e.target.value)}
+                          className="quantidade-input-num"
+                        />
+                      </label>
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() => handleAdicionarProdutoExistente(produto.id)}
+                      >
+                        + Adicionar
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="form-actions">
+              <button 
+                type="button" 
+                className="btn btn-info"
+                onClick={() => {
+                  setShowSelecionarProduto(false);
+                  setShowNovoItem(true);
+                }}
+              >
+                Criar Item Personalizado
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={() => setShowSelecionarProduto(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal Novo Item */}
       {showNovoItem && (
         <div className="modal-overlay" onClick={() => setShowNovoItem(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Adicionar Item</h2>
+            <h2>Criar Item Personalizado</h2>
             <form onSubmit={handleAdicionarItem}>
               <div className="form-group">
                 <label>Nome do Item *</label>

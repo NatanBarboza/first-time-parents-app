@@ -72,6 +72,42 @@ export const authService = {
   }
 };
 
+// Serviços de Categorias
+export const categoriaService = {
+  getAll: async (search = '') => {
+    const response = await api.get('/categorias/', {
+      params: { search: search || undefined }
+    });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(`/categorias/${id}`);
+    return response.data;
+  },
+
+  getProdutos: async (id, skip = 0, limit = 100) => {
+    const response = await api.get(`/categorias/${id}/produtos`, {
+      params: { skip, limit }
+    });
+    return response.data;
+  },
+
+  create: async (categoria) => {
+    const response = await api.post('/categorias/', categoria);
+    return response.data;
+  },
+
+  update: async (id, categoria) => {
+    const response = await api.put(`/categorias/${id}`, categoria);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    await api.delete(`/categorias/${id}`);
+  },
+};
+
 // Serviços de Produtos
 export const produtoService = {
   getAll: async (search = '') => {
@@ -83,6 +119,13 @@ export const produtoService = {
 
   getById: async (id) => {
     const response = await api.get(`/produtos/${id}`);
+    return response.data;
+  },
+
+  getEstoqueBaixo: async (limite = 5) => {
+    const response = await api.get('/produtos/estoque-baixo', {
+      params: { limite }
+    });
     return response.data;
   },
 
@@ -152,6 +195,23 @@ export const listaComprasService = {
 
   toggleItemComprado: async (itemId) => {
     const response = await api.patch(`/listas-compras/itens/${itemId}/toggle-comprado`);
+    return response.data;
+  },
+
+  // Produtos
+  getProdutosSugeridos: async (listaId, search = '') => {
+    const response = await api.get(`/listas-compras/${listaId}/produtos-sugeridos`, {
+      params: { search: search || undefined }
+    });
+    return response.data;
+  },
+
+  addProdutoExistente: async (listaId, produtoId, quantidade = 1) => {
+    const response = await api.post(
+      `/listas-compras/${listaId}/adicionar-produto/${produtoId}`,
+      null,
+      { params: { quantidade } }
+    );
     return response.data;
   },
 };
