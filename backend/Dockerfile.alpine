@@ -1,0 +1,76 @@
+# ============================================
+# Dockerfile Ultra-Otimizado com Alpine
+# Base: Python 3.11 Alpine
+# Tamanho final: ~120-150 MB (50% menor que Slim)
+# ============================================
+
+# ============================================
+# Stage 1: Builder
+# ============================================
+FROM python:3.11-alpine as builder
+
+WORKDIR /build
+
+# Instalar dependências de compilação
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    postgresql-dev \
+    python3-dev \
+    libffi-dev \
+    openssl-dev
+
+# Copiar requirements
+COPY requirements.txt .
+
+# Criar wheels
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /wheels \
+    -r requirements.txt
+
+# ============================================
+# Stage 2: Runtime
+# ============================================
+FROM python:3.11-alpine
+
+# Metadados
+LABEL maintainer="produto-app"
+LABEL description="Backend FastAPI - Gestão de Produtos (Alpine)"
+LABEL version="2.2.0"
+
+# Variáveis de ambiente
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
+
+# Criar usuário não-root
+RUN addgroup -g 1000 appuser && \
+    adduser -D -u 1000 -G appuser appuser
+
+# Instalar dependências runtime
+RUN apk add --no-cache \
+    postgresql-libs \
+    libffi \
+    curl
+
+WORKDIR /app
+
+# Copiar e instalar wheels
+COPY --from=builder /wheels /wheels
+RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/* \
+    && rm -rf /wheels
+
+# Copiar código
+COPY --chown=appuser:appuser ./app ./app
+COPY --chown=appuser:appuser ./scripts ./scripts
+COPY --chown=appuser:appuser run.py .
+
+# Mudar usuário
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/ || exit 1
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

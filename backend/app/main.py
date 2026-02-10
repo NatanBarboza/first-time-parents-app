@@ -7,6 +7,7 @@ from app.routes.auth import router as auth_router
 from app.routes.produto import router as produto_router
 from app.routes.lista_compras import router as lista_compras_router
 from app.routes.compra import router as compra_router
+from app.routes.categoria import router as categoria_router
 
 # Criar tabelas
 Base.metadata.create_all(bind=engine)
@@ -31,13 +32,14 @@ app.include_router(auth_router)
 app.include_router(produto_router)
 app.include_router(lista_compras_router)
 app.include_router(compra_router)
+app.include_router(categoria_router)
 
 @app.get("/")
 def read_root():
     return {
         "message": "API de Gestão de Produtos com Autenticação JWT",
         "version": "2.2.0",
-        "features": ["Produtos", "Autenticação", "Listas de Compras", "Histórico de Compras"]
+        "features": ["Produtos", "Autenticação", "Listas de Compras", "Histórico de Compras", "Categorias"]
     }
 
 if __name__ == "__main__":

@@ -22,6 +22,17 @@ def listar_produtos(
     produtos = crud.get_produtos(db, skip=skip, limit=limit, search=search)
     return produtos
 
+
+@router.get("/estoque-baixo", response_model=List[ProdutoResponse])
+def listar_produtos_estoque_baixo(
+    limite: int = Query(5, ge=0, description="Limite padrão quando o produto não tem estoque_minimo definido"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Lista produtos com estoque baixo (quantidade <= estoque_minimo ou limite). Útil para notificar ao criar lista de compras."""
+    return crud.get_produtos_estoque_baixo(db, limite_padrao=limite)
+
+
 @router.get("/{produto_id}", response_model=ProdutoResponse)
 def obter_produto(
     produto_id: int,

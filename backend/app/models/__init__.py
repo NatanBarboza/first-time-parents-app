@@ -1,4 +1,4 @@
-from app.models.models import Base, Produto, User, ListaCompras, ItemListaCompras, Compra, ItemCompra
+from app.models.models import Base, Produto, User, ListaCompras, ItemListaCompras, Compra, ItemCompra, Categoria
 
 __all__ = [
     "Base",
@@ -7,5 +7,6 @@ __all__ = [
     "ListaCompras",
     "ItemListaCompras",
     "Compra",
-    "ItemCompra"
+    "ItemCompra",
+    "Categoria",
 ]

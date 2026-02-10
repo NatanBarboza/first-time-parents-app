@@ -4,7 +4,7 @@ from typing import List
 
 from app.database import get_db
 from app.auth.auth import get_current_active_user
-from app.models import User
+from app.models import User, ItemListaCompras
 from app.schemas.lista_compras import (
     ListaComprasCreate,
     ListaComprasUpdate,
@@ -122,6 +122,39 @@ def adicionar_item_lista(
         )
     return db_item
 
+@router.get("/{lista_id}/produtos-sugeridos", response_model=List[dict])
+def listar_produtos_para_lista(
+    lista_id: int,
+    search: str = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Lista produtos disponíveis para adicionar à lista"""
+    from app.crud import produto as produto_crud
+    
+    # Verificar se lista pertence ao usuário
+    lista = crud.get_lista_compras(db, lista_id, current_user.id)
+    if not lista:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Lista de compras não encontrada"
+        )
+    
+    # Buscar produtos
+    produtos = produto_crud.get_produtos(db, search=search, limit=50)
+    
+    # Retornar com formato adequado
+    return [
+        {
+            "id": p.id,
+            "nome": p.nome,
+            "preco": p.preco,
+            "categoria": p.categoria,
+            "quantidade_estoque": p.quantidade_estoque
+        }
+        for p in produtos
+    ]
+
 @router.put("/itens/{item_id}", response_model=ItemListaComprasResponse)
 def atualizar_item_lista(
     item_id: int,
@@ -166,3 +199,59 @@ def toggle_item_comprado(
             detail="Item não encontrado"
         )
     return item
+
+@router.post("/{lista_id}/adicionar-produto/{produto_id}", response_model=ItemListaComprasResponse)
+def adicionar_produto_existente(
+    lista_id: int,
+    produto_id: int,
+    quantidade: int = Query(1, ge=1),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Adiciona um produto existente à lista de compras.
+    Se o produto já estiver na lista, incrementa a quantidade.
+    """
+    from app.crud import produto as produto_crud
+    
+    # Verificar se lista existe e pertence ao usuário
+    lista = crud.get_lista_compras(db, lista_id, current_user.id)
+    if not lista:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Lista de compras não encontrada"
+        )
+    
+    # Buscar produto
+    produto = produto_crud.get_produto(db, produto_id)
+    if not produto:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Produto não encontrado"
+        )
+    
+    # Verificar se produto já está na lista
+    item_existente = db.query(ItemListaCompras).filter(
+        ItemListaCompras.lista_id == lista_id,
+        ItemListaCompras.produto_id == produto_id
+    ).first()
+    
+    if item_existente:
+        # Atualizar quantidade do item existente
+        item_existente.quantidade += quantidade
+        db.commit()
+        db.refresh(item_existente)
+        return item_existente
+    
+    # Criar novo item da lista vinculado ao produto
+    from app.schemas.lista_compras import ItemListaComprasCreate
+    item_data = ItemListaComprasCreate(
+        nome_item=produto.nome,
+        quantidade=quantidade,
+        preco_estimado=produto.preco,
+        produto_id=produto.id,
+        observacao=produto.descricao if produto.descricao else None
+    )
+    
+    db_item = crud.create_item_lista(db, item_data, lista_id, current_user.id)
+    return db_item

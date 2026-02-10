@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (já está no código)
+*.md
+!requirements.txt
+
+# Database
+*.db
+*.sqlite3
+postgres_data/
+
+# Logs
+*.log
+
+# Environment files (usar secrets no deploy)
+.env
+.env.*
+
+# Tests
+tests/
+test_*.py
+*_test.py
+pytest.ini
+.pytest_cache/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+Jenkinsfile
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Arquivos temporários
+*.tmp
+*.temp
+.cache/
+
+# Outros arquivos desnecessários
+README.md
+LICENSE
+CHANGELOG.md
+*.tar.gz

@@ -39,6 +39,13 @@ from app.schemas.compra import (
     FinalizarListaRequest
 )
 
+from app.schemas.categoria import (
+    CategoriaBase,
+    CategoriaCreate,
+    CategoriaUpdate,
+    CategoriaResponse,
+)
+
 __all__ = [
     # Produto
     "ProdutoBase", "ProdutoCreate", "ProdutoUpdate", "ProdutoResponse",
@@ -51,5 +58,7 @@ __all__ = [
     # Compra
     "ItemCompraBase", "ItemCompraCreate", "ItemCompraResponse",
     "CompraBase", "CompraCreate", "CompraUpdate", "CompraResponse", "CompraSummary",
-    "FinalizarListaRequest"
+    "FinalizarListaRequest",
+    # Categoria
+    "CategoriaBase", "CategoriaCreate", "CategoriaUpdate", "CategoriaResponse",
 ]

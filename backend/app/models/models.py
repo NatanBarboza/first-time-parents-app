@@ -3,6 +3,18 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 
+class Categoria(Base):
+    __tablename__ = "categorias"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String(100), nullable=False, unique=True, index=True)
+    descricao = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    produtos = relationship("Produto", back_populates="categoria")
+
+
 class Produto(Base):
     __tablename__ = "produtos"
 
@@ -11,10 +23,13 @@ class Produto(Base):
     descricao = Column(Text)
     preco = Column(Float, nullable=False)
     quantidade_estoque = Column(Integer, default=0)
-    categoria = Column(String(100))
+    estoque_minimo = Column(Integer, nullable=True)  # abaixo ou igual = estoque baixo
+    categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=True, index=True)
     codigo_barras = Column(String(50), unique=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    categoria = relationship("Categoria", back_populates="produtos")
 
 class User(Base):
     __tablename__ = "users"
