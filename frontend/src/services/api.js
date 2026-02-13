@@ -259,4 +259,22 @@ export const compraService = {
   },
 };
 
+// Serviços de Assinatura
+export const assinaturaService = {
+  create: async (plano) => {
+    const response = await api.post('/assinaturas/', { plano });
+    return response.data;
+  },
+
+  getMe: async () => {
+    const response = await api.get('/assinaturas/me');
+    return response.data;
+  },
+
+  cancelar: async () => {
+    const response = await api.patch('/assinaturas/me/cancelar');
+    return response.data;
+  },
+};
+
 export default api;

@@ -4,10 +4,11 @@ import ProdutoCard from './components/ProdutoCard';
 import ProdutoForm from './components/ProdutoForm';
 import Login from './components/Login';
 import Register from './components/Register';
+import Landing from './components/Landing';
 import ListasCompras from './components/ListasCompras';
-import HistoricoCompras from './components/HistoricoCompras';
 import Categorias from './components/Categorias';
-import { produtoService, authService, categoriaService } from './services/api';
+import Dashboard from './components/Dashboard';
+import { produtoService, authService, categoriaService, assinaturaService } from './services/api';
 
 function App() {
   const [produtos, setProdutos] = useState([]);
@@ -18,7 +19,9 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
-  const [currentView, setCurrentView] = useState('produtos'); // 'produtos', 'listas', 'historico' ou 'categorias'
+  const [showAuth, setShowAuth] = useState(false); // false = mostra landing, true = mostra login/registro
+  const [selectedPlan, setSelectedPlan] = useState(null); // 'mensal' | 'anual' | null (ao vir da landing com plano)
+  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'produtos', 'listas', 'categorias'
   const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
@@ -63,9 +66,19 @@ function App() {
     setIsAuthenticated(true);
   };
 
-  const handleRegisterSuccess = (user) => {
+  const handleRegisterSuccess = async (user) => {
     setCurrentUser(user);
     setIsAuthenticated(true);
+    if (selectedPlan) {
+      try {
+        await assinaturaService.create({ plano: selectedPlan });
+        alert('Assinatura ativada! Confira o e-mail de confirmação em ' + (user.email || 'sua caixa de entrada') + '.');
+      } catch (err) {
+        console.error('Erro ao criar assinatura:', err);
+        alert('Conta criada, mas não foi possível ativar a assinatura. Tente novamente em "Minha assinatura" no app.');
+      }
+      setSelectedPlan(null);
+    }
   };
 
   const handleLogout = () => {
@@ -138,6 +151,23 @@ function App() {
     }
   };
 
+  // Landing page (não autenticado e ainda não escolheu entrar)
+  if (!isAuthenticated && !showAuth) {
+    return (
+      <Landing
+        onAcessar={() => {
+          setShowAuth(true);
+          setShowRegister(false);
+        }}
+        onCriarConta={(plan) => {
+          setSelectedPlan(plan || null);
+          setShowAuth(true);
+          setShowRegister(true);
+        }}
+      />
+    );
+  }
+
   // Tela de login/registro
   if (!isAuthenticated) {
     if (showRegister) {
@@ -171,6 +201,12 @@ function App() {
         <div className="header-actions">
           <nav className="nav-tabs">
             <button
+              className={`nav-tab ${currentView === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setCurrentView('dashboard')}
+            >
+              🏠 Início
+            </button>
+            <button
               className={`nav-tab ${currentView === 'produtos' ? 'active' : ''}`}
               onClick={() => setCurrentView('produtos')}
             >
@@ -181,12 +217,6 @@ function App() {
               onClick={() => setCurrentView('listas')}
             >
               🛒 Listas de Compras
-            </button>
-            <button
-              className={`nav-tab ${currentView === 'historico' ? 'active' : ''}`}
-              onClick={() => setCurrentView('historico')}
-            >
-              📊 Histórico
             </button>
             <button
               className={`nav-tab ${currentView === 'categorias' ? 'active' : ''}`}
@@ -201,8 +231,8 @@ function App() {
         </div>
       </header>
 
-      {currentView === 'historico' ? (
-        <HistoricoCompras />
+      {currentView === 'dashboard' ? (
+        <Dashboard />
       ) : currentView === 'listas' ? (
         <ListasCompras />
       ) : currentView === 'categorias' ? (
