@@ -1,4 +1,4 @@
-from app.models.models import Base, Produto, User, ListaCompras, ItemListaCompras, Compra, ItemCompra, Categoria
+from app.models.models import Base, Produto, User, ListaCompras, ItemListaCompras, Compra, ItemCompra, Categoria, Assinatura
 
 __all__ = [
     "Base",
@@ -9,4 +9,5 @@ __all__ = [
     "Compra",
     "ItemCompra",
     "Categoria",
+    "Assinatura",
 ]

@@ -8,6 +8,7 @@ from app.routes.produto import router as produto_router
 from app.routes.lista_compras import router as lista_compras_router
 from app.routes.compra import router as compra_router
 from app.routes.categoria import router as categoria_router
+from app.routes.assinatura import router as assinatura_router
 
 # Criar tabelas
 Base.metadata.create_all(bind=engine)
@@ -33,6 +34,7 @@ app.include_router(produto_router)
 app.include_router(lista_compras_router)
 app.include_router(compra_router)
 app.include_router(categoria_router)
+app.include_router(assinatura_router)
 
 @app.get("/")
 def read_root():

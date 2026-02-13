@@ -47,6 +47,7 @@ class User(Base):
     # Relacionamentos
     listas_compras = relationship("ListaCompras", back_populates="user", cascade="all, delete-orphan")
     compras = relationship("Compra", back_populates="user", cascade="all, delete-orphan")
+    assinaturas = relationship("Assinatura", back_populates="user", cascade="all, delete-orphan")
 
 class ListaCompras(Base):
     __tablename__ = "listas_compras"
@@ -113,3 +114,17 @@ class ItemCompra(Base):
     # Relacionamentos
     compra = relationship("Compra", back_populates="itens")
     produto = relationship("Produto")
+
+
+class Assinatura(Base):
+    __tablename__ = "assinaturas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    plano = Column(String(20), nullable=False)  # 'mensal' | 'anual'
+    status = Column(String(20), nullable=False, default="ativa")  # ativa, cancelada, pendente
+    data_inicio = Column(DateTime(timezone=True), server_default=func.now())
+    data_fim = Column(DateTime(timezone=True), nullable=True)  # para anual: inicio + 1 ano
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="assinaturas")
